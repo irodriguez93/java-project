@@ -11,6 +11,9 @@
   <path id="class.path">
     <pathelement location="./lib/junit-4.12.jar" />
     <pathelement location="./bin" />
+    <pathelement location="./lib/hamcrest-core-1.3.jar" />
+    <pathelement location="./bin" />
+
   </path>
 
   <!-- Deletes the existing build, docs and dist directory-->
