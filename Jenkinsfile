@@ -29,7 +29,8 @@ pipeline{
                         label 'apache'
                     }
                     steps{
-                        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/"
+                        sh "mkdir /var/www/html/rectangles/all/${env.BRANCH_NAME}"
+                        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/${env.BRANCH_NAME}/"
                     }
                 }
                 stage("Running on CentOS"){
@@ -37,7 +38,7 @@ pipeline{
                         label 'CentOS'
                     }
                     steps {
-                        sh "wget http://irodriguez1.mylabserver.com/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar"
+                        sh "wget http://irodriguez1.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
                         sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
                     }
                 }
@@ -46,7 +47,7 @@ pipeline{
                         docker 'openjdk:8u121-jre'
                     }
                     steps{
-                        sh "wget http://irodriguez1.mylabserver.com/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar"
+                        sh "wget http://irodriguez1.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
                         sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
                     }
                 }
@@ -55,10 +56,31 @@ pipeline{
                         label 'apache'
                     }
                     when{
-                        branch 'development'
+                        branch 'master'
                     }
                     steps{
                         sh "cp /var/www/html/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.BUILD_NUMBER}.jar"
+                    }
+                }
+                stage('promote Development Branch to Master'){
+                    agent{
+                        label 'apache'
+                    }
+                    when{
+                        breanch 'development'
+                    }
+                    steps{
+                        echo "stashing Any Local Changes"
+                        sh 'git stash'
+                        echo 'checking out development branch'
+                        sh 'git checkout development'
+                        echo 'checking out master branch'
+                        sh 'git checkout master'
+                        echo 'merging development into master branch'
+                        sh 'git merge development'
+                        echo 'pushing to origin master'
+                        sh 'git push origin master'
+
                     }
                 }
             }
